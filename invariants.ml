@@ -41,7 +41,7 @@ let rec str_of_term (t:term) :string = match t with
 let str_of_test (t:test) :string = match t with 
   | Equals(t1, t2) -> "(" ^ "= " ^ (str_of_term t1) ^ " " ^ (str_of_term t2) ^ ")"
   | LessThan(t1, t2) -> "(" ^ "< " ^ (str_of_term t1) ^ " " ^ (str_of_term t2) ^ ")"
-  | NEquals(t1, t2) -> "(" ^ "<> " ^ (str_of_term t1) ^ " " ^ (str_of_term t2) ^ ")"
+  | NEquals(t1, t2) -> "(" ^ "not (= " ^ (str_of_term t1) ^ " " ^ (str_of_term t2) ^ "))"
   | SupOrEqual(t1, t2) -> "(" ^ ">= " ^ (str_of_term t1) ^ " " ^ (str_of_term t2) ^ ")"
 
 let string_repeat s n =
@@ -127,11 +127,123 @@ let p1 = {nvars = 2;
           loopcond = LessThan ((Var 1),(Const 3));
           assertion = Equals ((Var 2),(Const 9))}
 
-let p2 = {nvars = 2;
-          inits = [(Const 0) ; (Const 1)];
-          mods = [Add ((Var 1), (Const 2)); Add ((Var 2), (Const 1))];
-          loopcond = LessThan ((Var 1),(Const 10));
-          assertion = Equals ((Var 2),(Const 9))}
+let p2 = {nvars = 3;
+          inits = [(Const 3) ; (Const 1); (Const 6)];
+          mods = [Add ((Var 1), (Const 1)); Mult ((Var 2), (Const 2)); Mult ((Var 3), (Const 7))];
+          loopcond = LessThan ((Var 2),(Const 60));
+          assertion = NEquals ((Var 3),(Const 30))} (* p2 implémente NEquals aussi ! *)
+
+(* RESULTAT DU TEST
+   sat
+   (
+   (define-fun Invar ((x!0 Int) (x!1 Int) (x!2 Int)) Bool
+    (or (and (not (= x!0 7))
+             (not (= x!0 6))
+             (= x!0 5)
+             (<= 1 x!1)
+             (<= 2 x!1)
+             (<= 4 x!1)
+             (not (<= 8 x!1))
+             (not (= x!2 14406))
+             (not (= x!2 2058))
+             (not (= x!2 42))
+             (not (= x!2 100842))
+             (not (= x!2 6))
+             (= x!2 294))
+        (and (not (= x!0 7))
+             (not (= x!0 6))
+             (not (= x!0 5))
+             (not (= x!0 3))
+             (not (= x!0 2))
+             (not (= x!0 0))
+             (= x!0 9)
+             (<= 1 x!1)
+             (<= 2 x!1)
+             (<= 4 x!1)
+             (<= 8 x!1)
+             (<= 15 x!1)
+             (<= 16 x!1)
+             (<= 30 x!1)
+             (<= 32 x!1)
+             (<= 59 x!1)
+             (<= 60 x!1)
+             (<= 64 x!1)
+             (not (= x!2 14406))
+             (not (= x!2 2058))
+             (not (= x!2 42))
+             (not (= x!2 100842))
+             (not (= x!2 6))
+             (not (= x!2 294))
+             (not (= x!2 30)))
+        (and (not (= x!0 7))
+             (not (= x!0 6))
+             (not (= x!0 5))
+             (not (= x!0 3))
+             (not (= x!0 2))
+             (not (= x!0 0))
+             (not (= x!0 9))
+             (not (= x!0 4))
+             (not (= x!0 10))
+             (not (= x!0 (- 1)))
+             (= x!0 8)
+             (<= 1 x!1)
+             (<= 2 x!1)
+             (<= 4 x!1)
+             (<= 8 x!1)
+             (<= 15 x!1)
+             (<= 16 x!1)
+             (<= 30 x!1)
+             (<= 32 x!1)
+             (not (<= 59 x!1))
+             (not (= x!2 14406))
+             (not (= x!2 2058))
+             (not (= x!2 42))
+             (= x!2 100842))
+        (and (not (= x!0 7))
+             (not (= x!0 6))
+             (not (= x!0 5))
+             (not (= x!0 3))
+             (not (= x!0 2))
+             (not (= x!0 0))
+             (not (= x!0 9))
+             (= x!0 4)
+             (<= 1 x!1)
+             (<= 2 x!1)
+             (not (<= 4 x!1))
+             (not (= x!2 14406))
+             (not (= x!2 2058))
+             (= x!2 42))
+        (and (not (= x!0 7))
+             (= x!0 6)
+             (<= 1 x!1)
+             (<= 2 x!1)
+             (<= 4 x!1)
+             (<= 8 x!1)
+             (not (<= 15 x!1))
+             (not (= x!2 14406))
+             (= x!2 2058))
+        (and (not (= x!0 7))
+             (not (= x!0 6))
+             (not (= x!0 5))
+             (= x!0 3)
+             (<= 1 x!1)
+             (not (<= 2 x!1))
+             (not (= x!2 14406))
+             (not (= x!2 2058))
+             (not (= x!2 42))
+             (not (= x!2 100842))
+             (= x!2 6))
+        (and (= x!0 7)
+             (<= 1 x!1)
+             (<= 2 x!1)
+             (<= 4 x!1)
+             (<= 8 x!1)
+             (<= 15 x!1)
+             (<= 16 x!1)
+             (not (<= 30 x!1))
+             (= x!2 14406))))
+   )
+*)
 
 
 let () = Printf.printf "%s" (smtlib_of_wa p2)
@@ -141,5 +253,3 @@ let () = Printf.printf "%s" (smtlib_of_wa p2)
    dans l'exercice 1. Ajoutez dans la variable p2 ci-dessous au moins
    un autre programme test, et vérifiez qu'il donne un fichier SMTLIB
    de la forme attendue. *)
-
-let p2 = None (* À compléter *)
